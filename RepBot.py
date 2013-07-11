@@ -152,12 +152,12 @@ class PrePostfixRepChange(RepChangeCommand):
         if len(self.getUser().split()) == 1:
             self.multiplier = 1
             self.setValid(True)
-        elif  len(self.getUser().split()) == 2:
+        elif len(self.getUser().split()) == 2:
             if self.getUser().split()[0].isdigit():
-                self.multiplier == self.getUser().split()[0]
+                self.multiplier = self.getUser().split()[0]
                 self.setValid(True)
             elif self.getUser().split()[1].isdigit():
-                self.multiplier == self.getUser().split()[1]
+                self.multiplier = self.getUser().split()[1]
                 self.setValid(True)
 
     def perform(self, val):
