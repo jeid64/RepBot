@@ -150,6 +150,7 @@ class PrePostfixRepChange(RepChangeCommand):
             self.op = msg[-2:]
 
         if len(self.getUser().split()) == 1:
+            self.multiplier = 1
             self.setValid(True)
         elif  len(self.getUser().split()) == 2:
             if self.getUser().split()[0].isdigit():
@@ -161,9 +162,9 @@ class PrePostfixRepChange(RepChangeCommand):
 
     def perform(self, val):
         if self.op == "++":
-            return val + 1
+            return val + self.multiplier
         elif self.op == "--":
-            return val - 1
+            return val - self.multiplier
 
 class PDP8RepChange(RepChangeCommand):
     def __init__(self, msg):
