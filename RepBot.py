@@ -149,7 +149,7 @@ class PrePostfixRepChange(RepChangeCommand):
             self.setUser(msg[:-2])
             self.op = msg[-2:]
 
-		self.setValid(True)
+        self.setValid(True)
 
     def perform(self, val):
         if self.op == "++":
