@@ -181,6 +181,25 @@ class PDP8RepChange(RepChangeCommand):
     def perform(self, val):
         return val + 1
 
+class MIPSRepChange(RepChangeCommand):
+    def __init__(self, msg):
+        super(MIPSRepChange, self).__init__()
+
+        m = msg.lower().split()
+
+        if len(m) != 3 or m[0] != "addi" or m[2] not in ("+1","1","-1"):
+            return
+
+        self.setUser(m[1])
+        self.setValid(True)
+        self.op = ('+'+m[2])[-2:]
+
+    def perform(self, val):
+        if self.op == "+1":
+            return val + 1
+        elif self.op == "-1":
+            return val - 1
+
 class RepChangeCommandFactory(object):
     REP_CHANGERS = [
         PrePostfixRepChange,
@@ -189,7 +208,8 @@ class RepChangeCommandFactory(object):
         X86_32RepChange,
         X86_16RepChange,
         X86_8RepChange,
-        PDP8RepChange
+        PDP8RepChange,
+        MIPSRepChange
     ]
 
     def parse(self, msg):
@@ -237,7 +257,17 @@ def normalize_config(cfg):
     ret["ignore"] = sorted(set(ret["ignore"]))
     ret["admins"] = sorted(set(ret["admins"]))
     ret["nick"] = ret["nick"].decode('ascii')
-    return ret
+    
+    def cleanup(item):
+        if isinstance(item, dict):
+            return {name:cleanup(val) for name, val in item.items()}
+        elif isinstance(item, list):
+            return [cleanup(x) for x in item]
+        elif isinstance(item, basestring):
+            return str(item)
+        else:
+            return item
+    return cleanup(ret)
 
 
 class RepBot(irc.IRCClient):
@@ -356,6 +386,7 @@ class RepBot(irc.IRCClient):
             # It doesn't match a rep change
             return
 
+        user = ident_to_name(ident)
         if self.ignores(ident) and not self.hasadmin(ident):
             self.msg(
                 user,
@@ -364,7 +395,6 @@ class RepBot(irc.IRCClient):
         if self.cfg["spy"]:
             self.log("[{1}]\t{0}:\t{2}".format(ident, channel, msg))
 
-        user = ident_to_name(ident)
         if isAdmin:
             self.admin(user, msg)
         elif channel == self.cfg["nick"] or not self.cfg["privonly"]:
